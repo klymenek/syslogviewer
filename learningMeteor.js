@@ -15,7 +15,7 @@ if (Meteor.isServer) {
   
   var dgram = require('dgram'); // UDP / Datagram Sockets
   var net = require('net'); // And general networking
-  var glossyParser = require('glossy').Parse; // Glossy = Syslog message parser
+  //var glossyParser = Parse; //require('glossy').Parse; // Glossy = Syslog message parser
 
   var listenIP = '0.0.0.0';
   var port = 514;
@@ -49,7 +49,7 @@ if (Meteor.isServer) {
       console.debug('Received data to UDP "' + identifier + '": ' + data);
 
       // Parse data from the string to a more useful format
-      var parsed = glossyParser.parse(data);
+      var parsed = parse(data); //glossyParser.parse(data);
 
       // Add the time received
       parsed.received = received;
