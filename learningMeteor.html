@@ -1,0 +1,21 @@
+<head>
+  <title>learningMeteor</title>
+</head>
+
+<body>
+  {{> log}}
+</body>
+
+<template name="log">
+  <ul class="log_list">
+  	{{#each log_entries}}
+        {{> log_entry}}
+    {{/each}}
+  </ul>
+</template>
+
+<template name="log_entry">
+	<li class="log_text">
+		{{text}}
+	</li>
+</template>
