@@ -1,8 +1,216 @@
-/* CSS declarations go here */
-#log_list .log_text {
+* {
+    padding: 0;
+    margin: 0;
+}
+
+ul {
+    list-style: none;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-size: 16px;
+    line-height: 1.5;
+    background: #eeeeee;
+    color: #333333;
+}
+
+body, input {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+input {
+    font-size: 100%;
+}
+
+a, a:visited, a:active {
+    color: #258;
+}
+
+h3 {
+    font-weight: bold;
+    text-decoration: underline;
+    font-size: 120%;
+    padding: 8px 6px;
+    text-align: center;
+}
+
+#top-tag-filter, #main-pane, #side-pane, #bottom-pane {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+}
+
+#top-tag-filter {
+    left: 200px;
+    height: 44px;
+    bottom: auto;
+    background: #ddd;
+    border-bottom: 1px solid #999;
+}
+
+#help {
+    padding: 8px;
+}
+
+#main-pane {
+    top: 45px;
+    bottom: 0;
+    left: 220px;
+    overflow: auto;
+}
+
+#side-pane {
+    width: 200px;
+    right: auto;
+    overflow: auto;
+    background: #eee;
+    border-right: 1px solid #999;
+    background: #ddd;
+}
+
+.tag {
+    cursor: pointer;
+    float: left;
+    margin: 5px;
+    padding: 2px 7px;
+    font-size: 80%;
+    font-weight: bold;
+    background: #999;
+    color: #fff;
+    border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    -o-border-radius: 4px;
+
+    opacity: 1;
+    transition: opacity 0.3s linear;
+    -moz-transition: opacity 0.3s linear;
+    -webkit-transition: opacity 0.3s linear;
+    -o-transition: opacity 0.3s linear;
+
+    position: relative;
+}
+
+#tag-filter .label {
+    float: left;
+    margin-top: 9px;
+    margin-left: 12px;
+    margin-right: 8px;
+}
+
+#tag-filter .tag {
+    margin-top: 10px;
+    border: 1px solid #777;
+}
+
+#tag-filter .selected {
+    background: #69d;
+}
+
+#tag-filter .count {
+    font-weight: normal;
+    padding-left: 2px;
+}
+
+#items-view {
+    margin-top: 5px;
+    margin-left: 5px;
+}
+
+#log_list .log_entry {
+    display: block;
+    height: 50px;
+    position: relative;
+    overflow: hidden;
+    border-top: 1px solid #ccc;
+}
+
+#log_list .log_entry .destroy {
+    cursor: pointer;
+    position: absolute;
+    left: 5px;
+    top: 15px;
+    height: 20px;
+    width: 20px;
+}
+
+#log_list .log_entry .display, #log_list .log_entry .edit {
+    margin-left: 30px;
+    height: 100%;
+    width: auto;
+    float: left;
+    padding-top: 18px;
+    line-height: 1;
+}
+
+#log_list .done .log_text {
+    text-decoration: line-through;
+    color: #999;
+}
+
+#log_list .log_entry:hover .destroy {
+    background: url('/destroy.png') no-repeat 0 0;
+}
+
+#log_list .log_entry .destroy:hover {
+    background-position: 0 -20px;
+}
+
+#log_list .log_entry .item-tags {
+    overflow: auto;
+    float: right;
+    margin-right: 8px;
+}
+
+#log_list .log_entry .item-tags .tag {
+    margin-top: 15px;
+}
+
+#log_list .log_entry .item-tags .removable_tag {
+    padding-right: 22px;
+}
+
+#log_list .log_entry .item-tags .tag .remove {
+    position: absolute;
+    top: 0;
+    right: 4px;
+    bottom: 0;
+    width: 16px;
+    background: url("/close_16.png") no-repeat 0 center;
+}
+
+#log_list .log_entry .item-tags .tag .remove:hover {
+    background-position: -16px center;
+}
+
+#log_list .log_entry .item-tags div.addtag {
+    background: none;
+    color: #333;
+    border: 1px dashed #999;
+}
+
+#log_list .log_entry .check {
+    float: left;
+    width: 25px;
+}
+
+#log_list .log_entry .log_text {
     float: left;
     margin-left: 10px;
     font-size: 100%;
-    text-decoration: line-through;
-    color: #999;
+}
+
+#log_list .log_entry .edit input {
+    margin-left: 35px;
+}
+
+#edittag-input {
+    width: 80px;
 }

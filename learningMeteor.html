@@ -7,15 +7,19 @@
 </body>
 
 <template name="log">
-  <ul class="log_list">
+  <div id="items-view">
+    <ul class="log_list">
   	{{#each log_entries}}
-        {{> log_entry}}
-    {{/each}}
-  </ul>
+        {{> log_item}}
+      {{/each}}
+    </ul>
+  </div>
 </template>
 
-<template name="log_entry">
-	<li class="log_text">
-		{{text}}
-	</li>
+<template name="log_item">  
+    <li class="log_entry">
+      <div class="display">
+        <div class="log_text">{{client}} - {{text}}</div>
+      </div>
+    </li>
 </template>
