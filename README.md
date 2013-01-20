@@ -1,9 +1,9 @@
 syslogviewer
 ============
 
-receives messages at udp port 514 and shows them live in browser with filtering options
+- receives syslog messages at udp port 514 and displays them with live update in browser including filtering options
 
-requires meteor (meteor.com)
+@requires meteor (meteor.com)
 
 example configuration for syslog daemon
 =======================================
