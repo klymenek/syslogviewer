@@ -8,9 +8,11 @@ syslogviewer
 example configuration for syslog daemon
 =======================================
 
-add the following line in the /etc/rsyslog.conf file to send messages to remote server
+- add the following line in the /etc/rsyslog.conf file for sending messages to remote server
 (for rsyslog, other implementations may have other config files)
 
 *.*;auth,authpriv.none  	@192.168.1.103
 
-restart daemon with: sudo /etc/init.d/rsyslog restart
+- restart daemon
+ 
+sudo /etc/init.d/rsyslog restart
