@@ -3,13 +3,29 @@
 </head>
 
 <body>
-  {{> log}}
-  {{>logs_bootstrap}}
+  <div id="log_filter">
+    {{> filter}}
+  </div>
+  <div id="log_pane">
+    {{> log}}
+  </div>
+  {{> logs_bootstrap}}
 </body>
 
+<template name="filter">
+  <div id="severity_filter">
+    <div class="label">Severity:</div>
+    {{#each severities}}
+      <div class="severity {{selected}}">
+        {{severity}}
+      </div>
+    {{/each}}
+  </div>
+</template>
+
 <template name="log">
-  <div id="items-view">
-    <ul class="log_list">
+  <div id="log_view">
+    <ul id="log_list">
   	{{#each log_entries}}
         {{> log_item}}
       {{/each}}
@@ -20,7 +36,7 @@
 <template name="log_item">  
     <li class="log_entry">
       <div class="display">
-        <div class="log_text">{{client}} - {{text}}</div>
+        <div class="log_text">{{time}} | {{severity}} | {{client}} | {{facility}} | {{message}}</div>
       </div>
     </li>
 </template>

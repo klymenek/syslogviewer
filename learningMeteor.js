@@ -3,22 +3,50 @@ TL = TLog.getLogger(TLog.LOGLEVEL_MAX,true);
 log_entries = new Meteor.Collection("log_entries");
 
 //session based filter params for logs
-//Session.set("log_client", "10.1.200.220");
-Session.set("log_client", "192.168.1.102");
-Session.set("log_type", "<150>"); //TODO ???
+Session.set("log_client", "raspberrypi (192.168.1.102)");
+Session.set("severity_filter", null);
 
 if (Meteor.isClient) {
   Meteor.subscribe('log_entries');
 
   Template.log.log_entries = function() {
-    return log_entries.find({client: Session.get("log_client")}, {sort: {received:-1}, limit: 50});
+    //return log_entries.find({client: Session.get("log_client")}, {sort: {received:-1}, limit: 50});
+    return log_entries.find({severity: Session.get("severity_filter")}, {sort: {received:-1}, limit: 50});
   };
+
+  ////////// Severity Filter //////////
+
+  Template.filter.severities = function () {
+    var severity_infos = [];
+
+    _.each(SeverityIndex, function(severity){
+      severity_infos.push({severity: severity});
+    });
+
+    return severity_infos;
+  };
+
+  Template.filter.severity = function () {
+    return this.severity || "All items";
+  };
+
+  Template.filter.selected = function () {
+    return Session.equals('severity_filter', this.severity) ? 'selected' : '';
+  };
+
+  Template.filter.events({
+    'mousedown .severity': function () {
+      if (Session.equals('severity_filter', this.severity))
+        Session.set('severity_filter', null);
+      else
+        Session.set('severity_filter', this.severity);
+    }
+  });
 }
 
 if (Meteor.isServer) {
   var require = __meteor_bootstrap__.require;
   var dgram = require('dgram'); // UDP/Datagram Sockets
-  //var glossyParser = Parse; //require('glossy').Parse; // Glossy = Syslog message parser
 
   // Syslog UDP Server
   var Server = {
@@ -41,12 +69,8 @@ if (Meteor.isServer) {
           return;
         }
 
-        // TODO glossy as syslog parser
         // Parse data from the string to a more useful format
-        //var parsed = parse(msg); //glossyParser.parse(data);
-
-        // Add the time received
-        //parsed.received = received;
+        var parsed = Glossy.parse(msg);
         
         var data = msg.toString();
 
@@ -55,9 +79,8 @@ if (Meteor.isServer) {
         Fiber(function() {
           TL.verbose("server got: " + msg + " from " + rinfo.address + ":" + rinfo.port);
         
-
-          //log_entries.insert({client:'pi', text: JSON.stringify(msg)});
-          log_entries.insert({client: rinfo.address, received: received, text: data});
+          log_entries.insert({client: parsed.host + ' (' + rinfo.address + ')', received: received, time: parsed.time,
+              facility: parsed.facility, severity: parsed.severity, message: parsed.message});
         }).run();
       });
 
