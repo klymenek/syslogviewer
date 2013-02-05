@@ -42,6 +42,124 @@ if (Meteor.isClient) {
         Session.set('severity_filter', this.severity);
     }
   });
+
+  ////////// Charts Filter //////////
+
+  Template.chart_filter.rendered = function () {  
+    var self = this;
+   
+    if (! self.handle) {
+      self.handle = Meteor.autorun(function () {
+        
+        var reload = Session.get("reload");      
+   
+        //TEST DATA
+        /*
+          01010001,14,405,MCI,MDW
+          01010530,-11,370,LAX,PHX
+          01010540,5,389,ONT,SMF
+          01010600,-5,337,OAK,LAX
+          01010600,3,303,MSY,HOU
+          01010605,5,236,LAS,LAX
+          01010610,-4,405,MDW,MCI
+          01010615,-2,188,RNO,SJC
+          01010615,0,197,FLL,TPA
+          01010615,0,399,SEA,BOI
+        */
+   
+        var flights = [
+          {date:"01010001", delay:14, distance:405},
+          {date:"01010530", delay:-11, distance:370},
+          {date:"01010540", delay:5, distance:389},
+          {date:"01010600", delay:-5, distance:337},
+        ];
+        
+        // A little coercion, since the CSV is untyped.
+        flights.forEach(function(d, i) {
+          d.index = i;
+          d.date = parseDate(d.date);
+          d.delay = +d.delay;
+          d.distance = +d.distance;
+        });
+   
+        // Like d3.time.format, but faster.
+        function parseDate(d) {
+          return new Date(2001,
+              d.substring(0, 2) - 1,
+              d.substring(2, 4),
+              d.substring(4, 6),
+              d.substring(6, 8));
+        }
+   
+        // Create the crossfilter for the relevant dimensions and groups.
+        var flight = crossfilter(flights),
+            all = flight.groupAll(),
+            date = flight.dimension(function(d) { return d3.time.day(d.date); }),
+            dates = date.group(),
+            hour = flight.dimension(function(d) { return d.date.getHours() + d.date.getMinutes() / 60; }),
+            hours = hour.group(Math.floor),
+            delay = flight.dimension(function(d) { return Math.max(-60, Math.min(149, d.delay)); }),
+            delays = delay.group(function(d) { return Math.floor(d / 10) * 10; }),
+            distance = flight.dimension(function(d) { return Math.min(1999, d.distance); }),
+            distances = distance.group(function(d) { return Math.floor(d / 50) * 50; });
+   
+        var charts = [
+   
+          barChart()
+              .dimension(hour)
+              .group(hours)
+            .x(d3.scale.linear()
+              .domain([0, 24])
+              .rangeRound([0, 10 * 24])),
+   
+          barChart()
+              .dimension(delay)
+              .group(delays)
+            .x(d3.scale.linear()
+              .domain([-60, 150])
+              .rangeRound([0, 10 * 21])),
+   
+          barChart()
+              .dimension(distance)
+              .group(distances)
+            .x(d3.scale.linear()
+              .domain([0, 2000])
+              .rangeRound([0, 10 * 40])),
+   
+          barChart()
+              .dimension(date)
+              .group(dates)
+              .round(d3.time.day.round)
+            .x(d3.time.scale()
+              .domain([new Date(2001, 0, 1), new Date(2001, 3, 1)])
+              .rangeRound([0, 10 * 90]))
+              .filter([new Date(2001, 1, 1), new Date(2001, 2, 1)])
+   
+        ];
+   
+        // Given our array of charts, which we assume are in the same order as the
+        // .chart elements in the DOM, bind the charts to the DOM and render them.
+        // We also listen to the chart's brush events to update the display.
+        var chart = d3.select("#charts").selectAll(".chart")
+            .data(charts)
+            .each(function(chart) { chart.on("brush", renderAll).on("brushend", renderAll); });
+   
+        renderAll();
+   
+        // Renders the specified chart or list.
+        function render(method) {
+          d3.select(this).call(method);
+        }
+   
+        // Whenever the brush moves, re-rendering everything.
+        function renderAll() {
+          chart.each(render);
+          //list.each(render);
+          //d3.select("#active").text(formatNumber(all.value()));
+        }
+      });
+    }
+  };
 }
 
 if (Meteor.isServer) {

@@ -5,4 +5,7 @@
 
 insecure
 preserve-inputs
-observatory
+bootstrap
+coffeescript
+less
+d3

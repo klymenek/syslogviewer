@@ -1,0 +1,21 @@
+db.log_entrie.find();
+db.log_entries.find();
+db.list_entries.remove({client: 'pi'});
+db.log_entries.find();"
+db.list_entries.remove({client: pi"});
+db.log_entries.find();
+db.list_entries.remove({client: "pi"});
+db.log_entries.find();
+db.list_entries.remove();
+db.log_entries.find();
+db.log_entries.remove({client: "pi"});
+db.log_entries.find();
+db.log_entries.remove({client: "pi"});
+db.log_entries.find();
+db.log_entries.remove({client: "pi"});
+db.log_entries.find();
+db.log_entries.find().sort({$natural:-1});
+db.log_entries.find().sort({$natural:-1}).limit(100);
+it
+db.log_entries.find().sort({$natural:-1}).limit(10);
+exi
