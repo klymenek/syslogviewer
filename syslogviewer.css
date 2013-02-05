@@ -38,7 +38,7 @@ h3 {
     text-align: center;
 }
 
-#log_filter, #log_pane {
+#log_filter, #log_pane, #log_filter_chart {
     position: absolute;
     left: 0;
     right: 0;
@@ -47,8 +47,12 @@ h3 {
     overflow: hidden;
 }
 
+#log_filter {
+    top: 180px;
+}
+
 #log_pane {
-    top: 45px;
+    top: 230px;
     overflow: auto;
 }
 
