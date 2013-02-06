@@ -4,20 +4,29 @@ log_entries = new Meteor.Collection("log_entries");
 
 //session based filter params for logs
 Session.set("log_client", "raspberrypi (192.168.1.102)");
-Session.set("severity_filter", null);
+Session.set("severity_filter", 'all');
 
 if (Meteor.isClient) {
   Meteor.subscribe('log_entries');
 
   Template.log.log_entries = function() {
+    var severity = Session.get("severity_filter");
+
+    var filter = {};
+    if(!Session.equals('severity_filter', 'all')) { 
+      filter = {severity: severity};
+    }
+
     //return log_entries.find({client: Session.get("log_client")}, {sort: {received:-1}, limit: 50});
-    return log_entries.find({severity: Session.get("severity_filter")}, {sort: {received:-1}, limit: 50});
+    return log_entries.find(filter, {sort: {received:-1}, limit: 50});
   };
 
   ////////// Severity Filter //////////
 
   Template.filter.severities = function () {
     var severity_infos = [];
+
+    severity_infos.push({severity: 'all'});
 
     _.each(SeverityIndex, function(severity){
       severity_infos.push({severity: severity});
@@ -27,7 +36,7 @@ if (Meteor.isClient) {
   };
 
   Template.filter.severity = function () {
-    return this.severity || "All items";
+    return this.severity || "all";
   };
 
   Template.filter.selected = function () {
@@ -43,91 +52,7 @@ if (Meteor.isClient) {
     }
   });
 
-  ////////// Charts Filter //////////
-/*
-  Template.chart_filter.rendered = function () {
-    var self = this;
-   
-    if (! self.handle) {
-      self.handle = Meteor.autorun(function () {
-
-        var reload = Session.get("reload");
-        
-        // retrieve all log entries
-        var logs = log_entries.find({severity: Session.get("severity_filter")}).fetch();
-
-        //var logs = log_entries.find({severity: Session.get("severity_filter")}, {sort: {received:-1}, limit: 50}).fetch();
-
-        // add date property to logs
-        logs.forEach(function(d, i) {
-          d.date = new Date(+d.received);
-        });
-   
-        // Create the crossfilter for the relevant dimensions and groups.
-        var log = crossfilter(logs),
-            all = log.groupAll(),
-            date = log.dimension(function(d) { return d3.time.day(d.date); }),
-            dates = date.group(),
-            hour = log.dimension(function(d) { return d.date.getHours() + d.date.getMinutes() / 60; }),
-            hours = hour.group(Math.floor);
-   
-        var charts = [
-   
-          barChart()
-              .dimension(date)
-              .group(dates)
-              .round(d3.time.day.round)
-            .x(d3.time.scale()
-              .domain([new Date(2013, 0, 1), new Date(2013, 3, 1)])
-              .rangeRound([0, 10 * 90]))
-              .filter([new Date(2013, 1, 1), new Date(2013, 2, 1)]),
-
-          barChart()
-              .dimension(hour)
-              .group(hours)
-            .x(d3.scale.linear()
-              .domain([0, 24])
-              .rangeRound([0, 10 * 24]))
-   
-        ];
-   
-        // Given our array of charts, which we assume are in the same order as the
-        // .chart elements in the DOM, bind the charts to the DOM and render them.
-        // We also listen to the chart's brush events to update the display.
-        var chart = d3.select("#charts").selectAll(".chart")
-            .data(charts)
-            .each(function(chart) { chart.on("brush", renderAll).on("brushend", renderAll); });
-   
-        renderAll();
-   
-        // Renders the specified chart or list.
-        function render(method) {
-          d3.select(this).call(method);
-        }
-   
-        // Whenever the brush moves, re-rendering everything.
-        function renderAll() {
-          chart.each(render);
-          //list.each(render);
-          //d3.select("#active").text(formatNumber(all.value()));
-        }
-
-        window.filter = function(filters) {
-          filters.forEach(function(d, i) { charts[i].filter(d); });
-          renderAll();
-        };
-
-        window.reset = function(i) {
-          charts[i].filter(null);
-          renderAll();
-        };
-      });
-    }
-  };
-  */
-
   Meteor.autosubscribe(function () {
-        
         // retrieve all log entries
         var logs = log_entries.find({severity: Session.get("severity_filter")}).fetch();
 
@@ -165,7 +90,7 @@ if (Meteor.isClient) {
               .rangeRound([0, 10 * 24]))
    
         ];
-   
+
         // Given our array of charts, which we assume are in the same order as the
         // .chart elements in the DOM, bind the charts to the DOM and render them.
         // We also listen to the chart's brush events to update the display.
