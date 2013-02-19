@@ -2,23 +2,31 @@ TL = TLog.getLogger(TLog.LOGLEVEL_MAX,true);
 
 log_entries = new Meteor.Collection("log_entries");
 
-//session based filter params for logs
-Session.set("log_client", "raspberrypi (192.168.1.102)");
-Session.set("severity_filter", 'all');
+var logFilter = {};
+
+function filteredLogEntries() {
+  return log_entries.find(logFilter, {sort: {received:-1}, limit: 50});
+}
 
 if (Meteor.isClient) {
-  Meteor.subscribe('log_entries');
+  //session based filter params for logs
+  Session.set("log_filter_changed", 'a');
+
+  Session.set("log_client", "raspberrypi (192.168.1.102)");
+  Session.set("log_entries_limit", 50);
+  Session.set("severity_filter", 'all');  
+
+  //Meteor.autosubscribe(function() {
+  //  Session.get("log_filter_changed");
+
+    Meteor.subscribe('log_entries');
+  //});
 
   Template.log.log_entries = function() {
-    var severity = Session.get("severity_filter");
-
-    var filter = {};
-    if(!Session.equals('severity_filter', 'all')) { 
-      filter = {severity: severity};
-    }
+    Session.get("log_filter_changed");
 
     //return log_entries.find({client: Session.get("log_client")}, {sort: {received:-1}, limit: 50});
-    return log_entries.find(filter, {sort: {received:-1}, limit: 50});
+    return log_entries.find();
   };
 
   ////////// Severity Filter //////////
@@ -46,17 +54,15 @@ if (Meteor.isClient) {
   Template.filter.events({
     'mousedown .severity': function () {
       if (Session.equals('severity_filter', this.severity))
-        Session.set('severity_filter', null);
+        Session.set('severity_filter', 'all');
       else
         Session.set('severity_filter', this.severity);
     }
   });
 
-  Meteor.autosubscribe(function () {
+  //Meteor.autosubscribe(function () {
         // retrieve all log entries
-        var logs = log_entries.find({severity: Session.get("severity_filter")}).fetch();
-
-        //var logs = log_entries.find({severity: Session.get("severity_filter")}, {sort: {received:-1}, limit: 50}).fetch();
+        var logs = log_entries.find().fetch();
 
         // add date property to logs
         logs.forEach(function(d, i) {
@@ -94,7 +100,7 @@ if (Meteor.isClient) {
         // Given our array of charts, which we assume are in the same order as the
         // .chart elements in the DOM, bind the charts to the DOM and render them.
         // We also listen to the chart's brush events to update the display.
-        var chart = d3.select("#charts").selectAll(".chart")
+        var chart = d3.select("#filter-charts").selectAll(".chart")
             .data(charts)
             .each(function(chart) { chart.on("brush", renderAll).on("brushend", renderAll); });
    
@@ -121,7 +127,23 @@ if (Meteor.isClient) {
           charts[i].filter(null);
           renderAll();
         };
-  });
+  //});
+
+  // Meteor.autosubscribe(function () {
+  //   var severity = Session.get("severity_filter");
+
+  //   if(Session.equals('severity_filter', 'all')) { 
+  //     logFilter = {};
+  //   } else {
+  //     logFilter = {severity: severity};
+  //   }
+
+  //   if(Session.equals("log_filter_changed", "a")) {
+  //     Session.set("log_filter_changed", 'b');
+  //   } else {
+  //     Session.set("log_filter_changed", 'a');
+  //   }
+  // });
 }
 
 if (Meteor.isServer) {
@@ -156,12 +178,16 @@ if (Meteor.isServer) {
 
         // Write parsed data to mongodb
         // TODO check for best practice
-        Fiber(function() {
+
+        var insertLogs = function() {
+
           TL.verbose("server got: " + msg + " from " + rinfo.address + ":" + rinfo.port);
         
           log_entries.insert({client: parsed.host + ' (' + rinfo.address + ')', received: received, time: parsed.time,
               facility: parsed.facility, severity: parsed.severity, message: parsed.message});
-        }).run();
+        }
+
+        Fiber(insertLogs).run();
       });
 
       // Run once the server is bound and listening
@@ -204,6 +230,6 @@ if (Meteor.isServer) {
   });
 
   Meteor.publish('log_entries', function() {
-    return log_entries.find();
+    return filteredLogEntries();
   });
 }
